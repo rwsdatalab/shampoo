@@ -1,0 +1,2 @@
+include shampoo/data/*.zip
+include shampoo/data/*.txt

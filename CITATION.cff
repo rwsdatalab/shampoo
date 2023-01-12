@@ -1,0 +1,18 @@
+# YAML 1.2
+---
+authors: 
+  -
+    family-names: RWSdatalab
+    given-names: RWSdatalab
+    orcid: "https://orcid.org/0000-0002-3430-9618"
+cff-version: "1.1.0"
+date-released: 2020-10-07
+keywords: 
+  - "python"
+  - "shampoo"
+license: "MIT"
+message: "If you use this software, please cite it using these metadata."
+repository-code: "https://github.com/rwsdatalab/shampoo"
+title: "shampoo"
+version: "0.1.0"
+...

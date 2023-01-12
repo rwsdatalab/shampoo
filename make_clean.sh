@@ -1,0 +1,21 @@
+echo "Cleaning repo first.."
+rm -rf dist
+rm -rf build
+rm -rf shampoo.egg-info
+rm -rf __pycache__
+rm -rf .pytest_cache
+rm -rf shampoo/__pycache__
+rm -rf shampoo/.pylint.d
+rm -rf shampoo/tests/__pycache__
+rm -rf tests/__pycache__
+rm -rf shampoo/utils/__pycache__
+rm -rf .pylint.d
+rm -rf shampoo/data/*.zip
+rm -rf shampoo/data/*.csv
+rm -rf *.js
+rm -rf *.html
+rm -rf *.css
+rm -rf *.dot
+rm -rf *.png
+rm -rf .coverage*
+rm -rf .pkl
