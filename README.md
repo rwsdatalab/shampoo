@@ -1,7 +1,6 @@
 # shampoo
 
 [![Python](https://img.shields.io/pypi/pyversions/shampoo)](https://img.shields.io/pypi/pyversions/shampoo)
-[![Pypi](https://img.shields.io/pypi/v/shampoo)](https://pypi.org/project/shampoo/)
 [![Docs](https://img.shields.io/badge/Sphinx-Docs-Green)](https://rwsdatalab.github.io/shampoo/)
 [![LOC](https://sloc.xyz/github/rwsdatalab/shampoo/?category=code)](https://github.com/rwsdatalab/shampoo/)
 [![Downloads](https://static.pepy.tech/personalized-badge/shampoo?period=month&units=international_system&left_color=grey&right_color=brightgreen&left_text=PyPI%20downloads/month)](https://pepy.tech/project/shampoo)
