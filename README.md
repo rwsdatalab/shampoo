@@ -19,18 +19,6 @@
 **Star this repo if you like it! ⭐️**
 #
 
-
-## Blog/Documentation
-
-* [**shampoo documentation pages (Sphinx)**](https://rwsdatalab.github.io/shampoo/)
-* [**Notebook with examples**](https://colab.research.google.com/github/rwsdatalab/shampoo/blob/master/notebooks/shampoo.ipynb)
-* [**Read more details and usage about shampoo in this blog!**](https://towardsdatascience.com/shampoo)
-
-* <a href="https://rwsdatalab.github.io/shampoo/"> <img src="https://img.shields.io/badge/Sphinx-Docs-Green" alt="Open documentation pages"/> </a> shampoo documentation pages 
-* <a href="https://colab.research.google.com/github/rwsdatalab/shampoo/blob/master/notebooks/shampoo.ipynb"> <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open example In Colab"/> </a> Notebook example 
-* <a href="https://towardsdatascience.com/a-step-by-step-guide-for-clustering-images-4b45f9906128"> <img src="https://img.shields.io/badge/Medium-Blog-blue" alt="Open Blog"/> </a> Blog: A step-by-step guide for clustering images 
-
-
 ### Contents
 - [Installation](#-installation)
 - [Contribute](#-contribute)
