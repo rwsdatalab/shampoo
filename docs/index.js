@@ -56,17 +56,10 @@ import zipfile
 
 clean_files = []
 clean_filenames = []
-list_regex_default = [('Artikel regel 1' , r"(Artikel=[a-z0-9\.]{1,7})(.{1,})citeertitel=Besluit activiteiten leefomgeving", r"${1}${2}citeertitel=Besluit activiteiten leefomgeving: ${1}"),
-              ('Artikel regel 2', ": Artikel=", ": artikel "),
-              ('Nummers 1', "^3^", "3"),
-              ('Nummers 2', "^2^", "2"),
-              ('Enters', "<br />", ""),
-              ('Various 1', "&lt;br /&gt;", ""),
-              ('Various 2', "&lt;!-- --&gt;", ""),
-              ('Various 3', "~", ""),
-              ('Various 3', 
-"\t\t<inter:regelgroepen>\\n\t\t</inter:regelgroepen>\\n", ""),
-               ]
+list_regex_default = ["Artikel regel 2<OOV>: Artikel=<OOV>: artikel",
+                      "Nummers 1<OOV>^3^<OOV>3",
+                      "Nummers 2<OOV>^2^<OOV>2",
+                      "Enters<OOV><br /><OOV>",]
 
 def on_press_download_button():
     global clean_files
@@ -82,8 +75,12 @@ def on_press_download_button():
 def on_add_regex_button(event):
     global list_regex_default
     # Add string to search_selector
-    list_regex_default.append((textbox_regex_name.value, 
-textbox_regex_from.value, textbox_regex_to.value))
+    list_regex_default.append(str(textbox_regex_name.value)+"<OOV>"+str(textbox_regex_from.value)+"<OOV>"+textbox_regex_to.value)
+    #print(list_regex_default)
+    print('-----')
+    search_selector.options = list_regex_default
+    search_selector.param.trigger('value')
+    #search_selector.force_new_dynamic_value()
     # print(list_regex_default)
 
     
@@ -104,7 +101,8 @@ textbox_regex_from.value, textbox_regex_to.value))
     
 
 # Create a file input component
-file_input = pn.widgets.FileInput(multiple=True)
+file_input = pn.widgets.FileInput(multiple=True).servable(area="sidebar")
+
 #file_input = pn.widgets.FileSelector('~')
 
 # Create a button to start processing the files.
@@ -114,17 +112,13 @@ process_button = Button(name='Process files')
 # save_button = Button(name='Save files')
 
 # Create download button
-download_button = pn.widgets.FileDownload(filename="data.zip", 
-callback=on_press_download_button, button_type="primary", disabled=True)
+download_button = pn.widgets.FileDownload(filename="data.zip", callback=on_press_download_button, button_type="primary", disabled=True)
 
 # Create a gauge bar to show the progress
-progress_gauge = Gauge(name='Progress', value=0, width=300, title_size=10, 
-colors=[(0.2, 'red'), (0.8, 'gold'), (1, 'green')])
+progress_gauge = Gauge(name='Progress', value=0, width=300, title_size=10, colors=[(0.2, 'red'), (0.8, 'gold'), (1, 'green')])
 
 # Create a crossSelector to search the input in each of the files
-search_selector = CrossSelector(name='Regular Expression', 
-options=list_regex_default, value=list_regex_default, width=1000, 
-definition_order=False)
+search_selector = CrossSelector(name='Regular Expression', options=list_regex_default, value=list_regex_default, width=1000, definition_order=False)
 
 # Create textbox to show processed files
 textbox = pn.widgets.input.TextAreaInput(placeholder='Processed files are shown here..', width=1000, height=225)
@@ -160,7 +154,14 @@ def on_button_press(event):
                     # Do some processing here
                     #print('Replace %s with %s' %(reg[1], reg[2]))
                     string =  file_input.value[i].decode('utf-8')
+                    reg = reg.split('<OOV>')
+                    print('----')
+                    print(reg[1])
+                    print(reg[2])
+                    print('----')
                     string = re.sub(reg[1], reg[2], string)
+                    print('afterwards')
+                    print(string)
                     #print(string[0:10])
 
                 # Store clean filename
@@ -221,8 +222,7 @@ top_panel = pn.Column()
 main_panel = pn.Column(
     top_panel,    
     search_selector,
-    pn.Row(textbox_regex_name, textbox_regex_from, textbox_regex_to, 
-add_regex_button),
+    pn.Row(textbox_regex_name, textbox_regex_from, textbox_regex_to, add_regex_button),
     pn.Row(textbox),
 )
 
@@ -237,18 +237,15 @@ dashboard = pn.Row(
     pn.Spacer(width=10),  # Set the top panel width to 30%
 )
 
-# pn.state.template.param.update(site_url="https://awesome-panel.org",
-#     site="Awesome Panel",
-#     title="Hello World",favicon="https://raw.githubusercontent.com/MarcSkovMadsen/awesome-panel-assets/320297ccb92773da099f6b97d267cc0433b67c23/favicon/ap-1f77b4.ico",)
+
+
 # Serve the dashboard
-# dashboard.servable()       
-#pn.extension()
+dashboard.servable()       
+pn.extension()
 #pn.extension(sizing_mode="stretch_width", template="fast")
 # panel serve hvplot_interactive.ipynb
-# panel serve --show --autoreload
+#panel serve --show --autoreload
 
-
-dashboard.servable()
 
 await write_doc()
   `
