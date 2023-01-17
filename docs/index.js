@@ -48,7 +48,7 @@ from panel.io.pyodide import init_doc, write_doc
 init_doc()
 
 import panel as pn
-from panel.widgets import Button, Gauge, CrossSelector
+from panel.widgets import Button, Gauge, CrossSelector,FileInput
 import time
 import re
 import io
@@ -110,7 +110,21 @@ process_button = Button(name='Process files')
 
 # Create a button to save button that contains the zipped files.
 # save_button = Button(name='Save files')
+#upload_regex = Button(name='Upload regex')
+def upload_file(event):
+    lines = upload_regex.value
+    lines = lines.decode()
+    #print(lines,' lines')
+    regex_lines = lines.split('\\n')
+    #print(regex_lines, ' regex_lines')
+    for i in regex_lines:
+        list_regex_default.append(str(i))
+    #print(list_regex_default)
+    search_selector.options = list_regex_default
+    search_selector.param.trigger('value')
 
+upload_regex = FileInput(accept='.txt', name='Upload regex txt file')
+upload_regex.param.watch(upload_file, 'value')
 # Create download button
 download_button = pn.widgets.FileDownload(filename="data.zip", callback=on_press_download_button, button_type="primary", disabled=True)
 
@@ -155,13 +169,13 @@ def on_button_press(event):
                     #print('Replace %s with %s' %(reg[1], reg[2]))
                     string =  file_input.value[i].decode('utf-8')
                     reg = reg.split('<OOV>')
-                    print('----')
-                    print(reg[1])
-                    print(reg[2])
-                    print('----')
+                    #print('----')
+                    #print(reg[1])
+                    #print(reg[2])
+                    #print('----')
                     string = re.sub(reg[1], reg[2], string)
-                    print('afterwards')
-                    print(string)
+                    #print('afterwards')
+                    #print(string)
                     #print(string[0:10])
 
                 # Store clean filename
@@ -211,6 +225,8 @@ left_panel = pn.Column(
     progress_gauge,
     # save_button,
     download_button,
+    "Upload text file to import regex rules",
+    upload_regex,
 )
 
 
@@ -223,6 +239,7 @@ main_panel = pn.Column(
     top_panel,    
     search_selector,
     pn.Row(textbox_regex_name, textbox_regex_from, textbox_regex_to, add_regex_button),
+    
     pn.Row(textbox),
 )
 
@@ -236,6 +253,7 @@ dashboard = pn.Row(
     main_panel,
     pn.Spacer(width=10),  # Set the top panel width to 30%
 )
+
 
 
 
