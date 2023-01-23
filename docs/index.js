@@ -62,7 +62,7 @@ list_regex_default = ["Artikel regel 2<OOV>: Artikel=<OOV>: artikel",
                       "Nummers 1<OOV>^3^<OOV>3",
                       "Nummers 2<OOV>^2^<OOV>2",
                      ]
-
+s = requests.session()
 def on_press_download_button():
     global clean_files
     global clean_filenames
@@ -117,7 +117,7 @@ def upload_file(event):
     #print(list_regex_default)
     #search_selector.options = list_regex_default
     asd = list(set(asd))
-    s.cookies.set("REGEX_VALUES", list_regex_default, domain="rwsdatalab.github.io/shampoo")
+    s.cookies.set("REGEX_VALUES", asd, domain="rwsdatalab.github.io/shampoo")
     search_selector.value=asd
     search_selector.param.trigger('value')
 
@@ -254,7 +254,7 @@ dashboard = pn.Row(
     pn.Spacer(width=10),  # Set the top panel width to 30%
 )
 
-s = requests.session()
+
 if s.cookies.get('REGEX_VALUES') != None:
     search_selector.value=s.cookies.get('REGEX_VALUES')
     search_selector.param.trigger('value')
