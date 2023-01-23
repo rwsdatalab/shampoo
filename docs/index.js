@@ -15,7 +15,7 @@ async function startApplication() {
   self.pyodide.globals.set("sendPatch", sendPatch);
   console.log("Loaded!");
   await self.pyodide.loadPackage("micropip");
-  const env_spec = ['https://cdn.holoviz.org/panel/0.14.2/dist/wheels/bokeh-2.4.3-py3-none-any.whl', 'https://cdn.holoviz.org/panel/0.14.2/dist/wheels/panel-0.14.2-py3-none-any.whl', 'pyodide-http==0.1.0']
+  const env_spec = ['https://cdn.holoviz.org/panel/0.14.2/dist/wheels/bokeh-2.4.3-py3-none-any.whl', 'https://cdn.holoviz.org/panel/0.14.2/dist/wheels/panel-0.14.2-py3-none-any.whl', 'pyodide-http==0.1.0', 'requests']
   for (const pkg of env_spec) {
     let pkg_name;
     if (pkg.endsWith('.whl')) {
@@ -47,19 +47,21 @@ from panel.io.pyodide import init_doc, write_doc
 
 init_doc()
 
+#this is the working one
 import panel as pn
 from panel.widgets import Button, Gauge, CrossSelector,FileInput
 import time
 import re
 import io
 import zipfile
+import requests
 
 clean_files = []
 clean_filenames = []
 list_regex_default = ["Artikel regel 2<OOV>: Artikel=<OOV>: artikel",
                       "Nummers 1<OOV>^3^<OOV>3",
                       "Nummers 2<OOV>^2^<OOV>2",
-                      "Enters<OOV><br /><OOV>",]
+                     ]
 
 def on_press_download_button():
     global clean_files
@@ -73,31 +75,22 @@ def on_press_download_button():
     return output
 
 def on_add_regex_button(event):
+    print("ADD REGEX")
     global list_regex_default
     # Add string to search_selector
-    list_regex_default.append(str(textbox_regex_name.value)+"<OOV>"+str(textbox_regex_from.value)+"<OOV>"+textbox_regex_to.value)
+    newList = str(textbox_regex_name.value)+"<OOV>"+str(textbox_regex_from.value)+"<OOV>"+str(textbox_regex_to.value)
+    list_regex_default.append(newList)
+    
+    
     #print(list_regex_default)
-    print('-----')
+    #print('--|--')
+    #print(str(textbox_regex_name.value)+"<OOV>"+str(textbox_regex_from.value)+"<OOV>"+textbox_regex_to.value)
+    list_regex_default = list(set(list_regex_default))
+    
     search_selector.options = list_regex_default
-    search_selector.param.trigger('value')
+    search_selector.param.trigger('options')
     #search_selector.force_new_dynamic_value()
     # print(list_regex_default)
-
-    
-
-#def on_save_button_press(event):
-#    global clean_files
-#    global clean_filenames
-#    import io
-#    import zipfile
-#    output = io.BytesIO()
-#    zf = zipfile.ZipFile(output, mode='w')
-#    zf.writestr(clean_filenames[0], clean_files[0])
-#    zf.writestr(clean_filenames[1], clean_files[1])
-#    zf.close()
-#    open('data.zip', 'wb').write(output.getbuffer())
-#    with open(clean_filenames[0]+'_filter', 'w') as f:
-#        f.writelines(clean_files[0])
     
 
 # Create a file input component
@@ -117,10 +110,15 @@ def upload_file(event):
     #print(lines,' lines')
     regex_lines = lines.split('\\n')
     #print(regex_lines, ' regex_lines')
+    asd = []
     for i in regex_lines:
         list_regex_default.append(str(i))
+        asd.append(str(i))
     #print(list_regex_default)
-    search_selector.options = list_regex_default
+    #search_selector.options = list_regex_default
+    asd = list(set(asd))
+    s.cookies.set("REGEX_VALUES", list_regex_default, domain="rwsdatalab.github.io/shampoo")
+    search_selector.value=asd
     search_selector.param.trigger('value')
 
 upload_regex = FileInput(accept='.txt', name='Upload regex txt file')
@@ -132,7 +130,7 @@ download_button = pn.widgets.FileDownload(filename="data.zip", callback=on_press
 progress_gauge = Gauge(name='Progress', value=0, width=300, title_size=10, colors=[(0.2, 'red'), (0.8, 'gold'), (1, 'green')])
 
 # Create a crossSelector to search the input in each of the files
-search_selector = CrossSelector(name='Regular Expression', options=list_regex_default, value=list_regex_default, width=1000, definition_order=False)
+search_selector = CrossSelector(name='Regular Expression', options=list_regex_default, value=[], width=1000, definition_order=False)
 
 # Create textbox to show processed files
 textbox = pn.widgets.input.TextAreaInput(placeholder='Processed files are shown here..', width=1000, height=225)
@@ -168,11 +166,13 @@ def on_button_press(event):
                     # Do some processing here
                     #print('Replace %s with %s' %(reg[1], reg[2]))
                     string =  file_input.value[i].decode('utf-8')
+                    print(string)
                     reg = reg.split('<OOV>')
-                    #print('----')
-                    #print(reg[1])
-                    #print(reg[2])
-                    #print('----')
+                    print('----')
+                    print(string)
+                    print(reg[1])
+                    print(reg[2])
+                    print('----')
                     string = re.sub(reg[1], reg[2], string)
                     #print('afterwards')
                     #print(string)
@@ -225,7 +225,7 @@ left_panel = pn.Column(
     progress_gauge,
     # save_button,
     download_button,
-    "Upload text file to import regex rules",
+    "Upload regex.txt",
     upload_regex,
 )
 
@@ -254,8 +254,17 @@ dashboard = pn.Row(
     pn.Spacer(width=10),  # Set the top panel width to 30%
 )
 
+s = requests.session()
+if s.cookies.get('REGEX_VALUES') != None:
+    search_selector.value=s.cookies.get('REGEX_VALUES')
+    search_selector.param.trigger('value')
 
-
+# Serve the dashboard
+#dashboard.servable()       
+#pn.extension()
+#pn.extension(sizing_mode="stretch_width", template="fast")
+# panel serve hvplot_interactive.ipynb
+#panel serve --show --autoreload
 
 # Serve the dashboard
 dashboard.servable()       
