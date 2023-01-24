@@ -48,21 +48,76 @@ from panel.io.pyodide import init_doc, write_doc
 init_doc()
 
 #this is the working one
+
+
 import panel as pn
 from panel.widgets import Button, Gauge, CrossSelector,FileInput
 import time
 import re
 import io
 import zipfile
-import requests
+import http
+pn.extension('bokeh')
 
 clean_files = []
 clean_filenames = []
 list_regex_default = ["Artikel regel 2<OOV>: Artikel=<OOV>: artikel",
                       "Nummers 1<OOV>^3^<OOV>3",
-                      "Nummers 2<OOV>^2^<OOV>2",
-                     ]
-s = requests.session()
+                      "Nummers 2<OOV>^2^<OOV>2",]
+
+
+def savecookie():
+    import datetime
+    import requests
+
+    import http.cookiejar
+
+    # create a new cookie
+    import datetime
+    import http.cookiejar
+
+    expires = datetime.datetime.now() + datetime.timedelta(hours=1)
+    expires = expires.strftime("%a, %d %b %Y %H:%M:%S GMT")
+    expires_time = time.mktime(time.strptime(expires, '%a, %d %b %Y %H:%M:%S GMT'))
+    # create a new cookie
+    cookie = http.cookiejar.Cookie(
+        version=0,
+        name="example",
+        value="value",
+        expires=expires_time,
+        port=None,
+        port_specified=False,
+        domain="example.com",
+        domain_specified=True,
+        domain_initial_dot=False,
+        path="/",
+        path_specified=True,
+        secure=False,
+        discard=True,
+        comment=None,
+        comment_url=None,
+        rest={'HttpOnly': None},
+        rfc2109=False
+    )
+
+    # create a new cookie jar
+    cookie_jar = http.cookiejar.MozillaCookieJar('cookies.txt')
+
+    # add the cookie to the cookie jar
+    cookie_jar.set_cookie(cookie)
+    cookie_jar.save()
+
+
+    print(pn.state.cookies.items())
+    
+
+def updatecookie():
+    html = pn.pane.HTML('')
+    html.object = """
+    <script>
+        document.cookie = "custom_cookie=custom_value; Expires=Fri, 14 Jan 2023 14:28:00 GMT, SameSite=None; Secure";
+    </script>
+    """
 def on_press_download_button():
     global clean_files
     global clean_filenames
@@ -74,27 +129,38 @@ def on_press_download_button():
     output.seek(0)
     return output
 
+""" 
+add manual regex
+"""
 def on_add_regex_button(event):
-    print("ADD REGEX")
+
+    savecookie()
+    updatecookie()
+    print("|||||||||||")
+    #get_panel()
     global list_regex_default
     # Add string to search_selector
-    newList = str(textbox_regex_name.value)+"<OOV>"+str(textbox_regex_from.value)+"<OOV>"+str(textbox_regex_to.value)
-    list_regex_default.append(newList)
-    
-    
+    #list_regex_default.append(str(textbox_regex_name.value)+"<OOV>"+str(textbox_regex_from.value)+"<OOV>"+str(textbox_regex_to.value))
     #print(list_regex_default)
-    #print('--|--')
-    #print(str(textbox_regex_name.value)+"<OOV>"+str(textbox_regex_from.value)+"<OOV>"+textbox_regex_to.value)
-    list_regex_default = list(set(list_regex_default))
-    
-    search_selector.options = list_regex_default
-    search_selector.param.trigger('options')
+    reg_val = str(str(textbox_regex_name.value)+"<OOV>"+\
+            str(textbox_regex_from.value)+"<OOV>"+str(textbox_regex_to.value))
+
+    if reg_val not in list_regex_default and len(reg_val)>10:
+
+        print("original list, ", list_regex_default)
+        print(search_selector.value)
+        list_regex_default.append(reg_val)
+        print("Manually added, ", list_regex_default[-1])
+    #search_selector.value = search_selector.value + list_regex_default[-1]
+        search_selector.value.append(list_regex_default[-1])
+        print(search_selector.value)
+        search_selector.param.trigger('value')
     #search_selector.force_new_dynamic_value()
     # print(list_regex_default)
     
 
 # Create a file input component
-file_input = pn.widgets.FileInput(multiple=True).servable(area="sidebar")
+file_input = pn.widgets.FileInput(multiple=True)
 
 #file_input = pn.widgets.FileSelector('~')
 
@@ -104,22 +170,24 @@ process_button = Button(name='Process files')
 # Create a button to save button that contains the zipped files.
 # save_button = Button(name='Save files')
 #upload_regex = Button(name='Upload regex')
+##
+##
+"""
+Upload regex file
+"""
 def upload_file(event):
     lines = upload_regex.value
     lines = lines.decode()
     #print(lines,' lines')
     regex_lines = lines.split('\\n')
     #print(regex_lines, ' regex_lines')
-    asd = []
+    print('-----------------')
     for i in regex_lines:
-        list_regex_default.append(str(i))
-        asd.append(str(i))
-    #print(list_regex_default)
-    #search_selector.options = list_regex_default
-    asd = list(set(asd))
-    s.cookies.set("REGEX_VALUES", asd, domain="rwsdatalab.github.io/shampoo")
-    search_selector.value=asd
-    search_selector.param.trigger('value')
+        if str(i) not in list_regex_default and len(str(i))>0:
+            list_regex_default.append(str(i))
+            print(str(i))
+            search_selector.value.append(str(i))
+            search_selector.param.trigger('value')
 
 upload_regex = FileInput(accept='.txt', name='Upload regex txt file')
 upload_regex.param.watch(upload_file, 'value')
@@ -127,8 +195,8 @@ upload_regex.param.watch(upload_file, 'value')
 download_button = pn.widgets.FileDownload(filename="data.zip", callback=on_press_download_button, button_type="primary", disabled=True)
 
 # Create a gauge bar to show the progress
-progress_gauge = Gauge(name='Progress', value=0, width=300, title_size=10, colors=[(0.2, 'red'), (0.8, 'gold'), (1, 'green')])
-
+#progress_gauge = Gauge(name='Progress', value=0, width=300, title_size=10, colors=[(0.2, 'red'), (0.8, 'gold'), (1, 'green')])
+progress_gauge = pn.indicators.LinearGauge(name='Progress of applying regex', value=0,bounds=(0,100),format='{value:.0f} %', horizontal=True,width=100)
 # Create a crossSelector to search the input in each of the files
 search_selector = CrossSelector(name='Regular Expression', options=list_regex_default, value=[], width=1000, definition_order=False)
 
@@ -159,20 +227,18 @@ def on_button_press(event):
             for i, _ in enumerate(files):
                 string = ''
                 # Update process for files
-                progress_gauge.value = (i + 1) / len(files) * 100
+                progress_gauge.value = ((i + 1) / len(files) )* 100
                 # print(file_input.filename[i])
 
                 for reg in regex:
                     # Do some processing here
                     #print('Replace %s with %s' %(reg[1], reg[2]))
                     string =  file_input.value[i].decode('utf-8')
-                    print(string)
                     reg = reg.split('<OOV>')
-                    print('----')
-                    print(string)
-                    print(reg[1])
-                    print(reg[2])
-                    print('----')
+                    #print('----')
+                    #print(reg[1])
+                    #print(reg[2])
+                    #print('----')
                     string = re.sub(reg[1], reg[2], string)
                     #print('afterwards')
                     #print(string)
@@ -218,14 +284,14 @@ add_regex_button.on_click(on_add_regex_button)
 
 # Create the left-side panel
 left_panel = pn.Column(
-    "Upload files",
+    "Upload file to apply Regex",
     file_input,
     pn.Spacer(width=50),  # Add some space between the panels
     process_button,
     progress_gauge,
     # save_button,
     download_button,
-    "Upload regex.txt",
+    "Upload text file to import regex rules",
     upload_regex,
 )
 
@@ -255,20 +321,11 @@ dashboard = pn.Row(
 )
 
 
-if s.cookies.get('REGEX_VALUES') != None:
-    search_selector.value=s.cookies.get('REGEX_VALUES')
-    search_selector.param.trigger('value')
-
-# Serve the dashboard
-#dashboard.servable()       
-#pn.extension()
-#pn.extension(sizing_mode="stretch_width", template="fast")
-# panel serve hvplot_interactive.ipynb
-#panel serve --show --autoreload
 
 # Serve the dashboard
 dashboard.servable()       
-pn.extension()
+
+pn.extension('bokeh')
 #pn.extension(sizing_mode="stretch_width", template="fast")
 # panel serve hvplot_interactive.ipynb
 #panel serve --show --autoreload
