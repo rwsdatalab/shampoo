@@ -15,7 +15,7 @@ async function startApplication() {
   self.pyodide.globals.set("sendPatch", sendPatch);
   console.log("Loaded!");
   await self.pyodide.loadPackage("micropip");
-  const env_spec = ['https://cdn.holoviz.org/panel/0.14.2/dist/wheels/bokeh-2.4.3-py3-none-any.whl', 'https://cdn.holoviz.org/panel/0.14.2/dist/wheels/panel-0.14.2-py3-none-any.whl', 'pyodide-http==0.1.0', 'fastapi', 'requests']
+  const env_spec = ['https://cdn.holoviz.org/panel/0.14.2/dist/wheels/bokeh-2.4.3-py3-none-any.whl', 'https://cdn.holoviz.org/panel/0.14.2/dist/wheels/panel-0.14.2-py3-none-any.whl', 'pyodide-http==0.1.0', 'requests']
   for (const pkg of env_spec) {
     let pkg_name;
     if (pkg.endsWith('.whl')) {
@@ -57,8 +57,7 @@ import re
 import io
 import zipfile
 import http
-from fastapi import Response
-from fastapi.responses import JSONResponse
+
 
 
 
@@ -133,10 +132,8 @@ def on_press_download_button():
     return output
 
 def create_cookie():
-    content = {"message": "Come to the dark side, we have cookies"}
-    response = JSONResponse(content=content)
-    response.set_cookie(key="fakesession", value="fake-cookie-session-value")
-    return response
+    cookie: "http.cookies.BaseCookie[str]" = http.cookies.SimpleCookie()
+    cookie['key'] = 'VALASD'
 
 """ 
 add manual regex
