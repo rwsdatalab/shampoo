@@ -57,13 +57,13 @@ import re
 import io
 import zipfile
 import http
-pn.extension('bokeh')
+
 
 clean_files = []
 clean_filenames = []
 list_regex_default = ["Artikel regel 2<OOV>: Artikel=<OOV>: artikel",
-                      "Nummers 1<OOV>^3^<OOV>3",
-                      "Nummers 2<OOV>^2^<OOV>2",]
+                      "Nummers 1<OOV>\^3\^<OOV>3",
+                      "Nummers 2<OOV>\^2\^<OOV>2",]
 
 
 def savecookie():
@@ -133,9 +133,11 @@ def on_press_download_button():
 add manual regex
 """
 def on_add_regex_button(event):
-
-    savecookie()
-    updatecookie()
+    regx = search_selector.value 
+    
+    for r in regx:
+        print(str(r.split('<OOV>')))
+    
     print("|||||||||||")
     #get_panel()
     global list_regex_default
@@ -176,6 +178,8 @@ process_button = Button(name='Process files')
 Upload regex file
 """
 def upload_file(event):
+
+    
     lines = upload_regex.value
     lines = lines.decode()
     #print(lines,' lines')
@@ -199,6 +203,28 @@ download_button = pn.widgets.FileDownload(filename="data.zip", callback=on_press
 progress_gauge = pn.indicators.LinearGauge(name='Progress of applying regex', value=0,bounds=(0,100),format='{value:.0f} %', horizontal=True,width=100)
 # Create a crossSelector to search the input in each of the files
 search_selector = CrossSelector(name='Regular Expression', options=list_regex_default, value=[], width=1000, definition_order=False)
+
+
+#werkt alleen als je met values heen en weer gaat
+# oplossing bedenken voor het wijzigen van een value
+# def print_value(value):
+#     print("Selected value:", value)
+#     print(search_selector.value)
+
+# pn.interact(print_value, value=search_selector)
+
+
+
+# @pn.depends(search_selector.param.value)
+# def callback(value):
+#     print("Selected value:", value)
+#     # Edit the selected value here
+#     print(value)
+# def print_value(event):
+#     print("Selected value:", event.new)
+# search_selector.param.value.on_change('click',print_value)
+# search_selector.param.watch(callback, 'value')
+# search_selector.param.watch_values(callback, 'value')
 
 # Create textbox to show processed files
 textbox = pn.widgets.input.TextAreaInput(placeholder='Processed files are shown here..', width=1000, height=225)
@@ -229,21 +255,17 @@ def on_button_press(event):
                 # Update process for files
                 progress_gauge.value = ((i + 1) / len(files) )* 100
                 # print(file_input.filename[i])
-
+                string =  file_input.value[i].decode('utf-8')
                 for reg in regex:
                     # Do some processing here
                     #print('Replace %s with %s' %(reg[1], reg[2]))
-                    string =  file_input.value[i].decode('utf-8')
+                    
                     reg = reg.split('<OOV>')
-                    #print('----')
-                    #print(reg[1])
-                    #print(reg[2])
-                    #print('----')
-                    string = re.sub(reg[1], reg[2], string)
-                    #print('afterwards')
-                    #print(string)
-                    #print(string[0:10])
-
+                    string = re.sub(str(reg[1]), reg[2], string)
+                    string = re.sub(str(reg[1]),reg[2],r'{}'.format(string))
+                    string = re.sub(r'{}'.format(reg[1]),reg[2],r'{}'.format(string))
+                    string = re.sub(r'{}'.format(reg[1]),reg[2],string)
+                    print(string)
                 # Store clean filename
                 clean_files.append(string)
                 clean_filenames.append(file_input.filename[i])
@@ -307,6 +329,7 @@ main_panel = pn.Column(
     pn.Row(textbox_regex_name, textbox_regex_from, textbox_regex_to, add_regex_button),
     
     pn.Row(textbox),
+    
 )
 
 
