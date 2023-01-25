@@ -15,7 +15,7 @@ async function startApplication() {
   self.pyodide.globals.set("sendPatch", sendPatch);
   console.log("Loaded!");
   await self.pyodide.loadPackage("micropip");
-  const env_spec = ['https://cdn.holoviz.org/panel/0.14.2/dist/wheels/bokeh-2.4.3-py3-none-any.whl', 'https://cdn.holoviz.org/panel/0.14.2/dist/wheels/panel-0.14.2-py3-none-any.whl', 'pyodide-http==0.1.0', 'requests']
+  const env_spec = ['https://cdn.holoviz.org/panel/0.14.2/dist/wheels/bokeh-2.4.3-py3-none-any.whl', 'https://cdn.holoviz.org/panel/0.14.2/dist/wheels/panel-0.14.2-py3-none-any.whl', 'pyodide-http==0.1.0', 'fastapi', 'requests']
   for (const pkg of env_spec) {
     let pkg_name;
     if (pkg.endsWith('.whl')) {
@@ -57,6 +57,9 @@ import re
 import io
 import zipfile
 import http
+from fastapi import Response
+from fastapi.responses import JSONResponse
+
 
 
 clean_files = []
@@ -129,17 +132,24 @@ def on_press_download_button():
     output.seek(0)
     return output
 
+def create_cookie():
+    content = {"message": "Come to the dark side, we have cookies"}
+    response = JSONResponse(content=content)
+    response.set_cookie(key="fakesession", value="fake-cookie-session-value")
+    return response
+
 """ 
 add manual regex
 """
 def on_add_regex_button(event):
-    regx = search_selector.value 
+    # regx = search_selector.value 
     
-    for r in regx:
-        print(str(r.split('<OOV>')))
+    # for r in regx:
+    #     print(str(r.split('<OOV>')))
     
-    print("|||||||||||")
+    # print("|||||||||||")
     #get_panel()
+    create_cookie()
     global list_regex_default
     # Add string to search_selector
     #list_regex_default.append(str(textbox_regex_name.value)+"<OOV>"+str(textbox_regex_from.value)+"<OOV>"+str(textbox_regex_to.value))
