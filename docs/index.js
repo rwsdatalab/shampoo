@@ -15,7 +15,7 @@ async function startApplication() {
   self.pyodide.globals.set("sendPatch", sendPatch);
   console.log("Loaded!");
   await self.pyodide.loadPackage("micropip");
-  const env_spec = ['https://cdn.holoviz.org/panel/0.14.2/dist/wheels/bokeh-2.4.3-py3-none-any.whl', 'https://cdn.holoviz.org/panel/0.14.2/dist/wheels/panel-0.14.2-py3-none-any.whl', 'pyodide-http==0.1.0', 'requests']
+  const env_spec = ['https://cdn.holoviz.org/panel/0.14.2/dist/wheels/bokeh-2.4.3-py3-none-any.whl', 'https://cdn.holoviz.org/panel/0.14.2/dist/wheels/panel-0.14.2-py3-none-any.whl', 'pyodide-http==0.1.0']
   for (const pkg of env_spec) {
     let pkg_name;
     if (pkg.endsWith('.whl')) {
@@ -59,8 +59,6 @@ import zipfile
 import http
 
 
-
-
 clean_files = []
 clean_filenames = []
 list_regex_default = ["Artikel regel 2<OOV>: Artikel=<OOV>: artikel",
@@ -68,58 +66,6 @@ list_regex_default = ["Artikel regel 2<OOV>: Artikel=<OOV>: artikel",
                       "Nummers 2<OOV>\^2\^<OOV>2",]
 
 
-def savecookie():
-    import datetime
-    import requests
-
-    import http.cookiejar
-
-    # create a new cookie
-    import datetime
-    import http.cookiejar
-
-    expires = datetime.datetime.now() + datetime.timedelta(hours=1)
-    expires = expires.strftime("%a, %d %b %Y %H:%M:%S GMT")
-    expires_time = time.mktime(time.strptime(expires, '%a, %d %b %Y %H:%M:%S GMT'))
-    # create a new cookie
-    cookie = http.cookiejar.Cookie(
-        version=0,
-        name="example",
-        value="value",
-        expires=expires_time,
-        port=None,
-        port_specified=False,
-        domain="example.com",
-        domain_specified=True,
-        domain_initial_dot=False,
-        path="/",
-        path_specified=True,
-        secure=False,
-        discard=True,
-        comment=None,
-        comment_url=None,
-        rest={'HttpOnly': None},
-        rfc2109=False
-    )
-
-    # create a new cookie jar
-    cookie_jar = http.cookiejar.MozillaCookieJar('cookies.txt')
-
-    # add the cookie to the cookie jar
-    cookie_jar.set_cookie(cookie)
-    cookie_jar.save()
-
-
-    print(pn.state.cookies.items())
-    
-
-def updatecookie():
-    html = pn.pane.HTML('')
-    html.object = """
-    <script>
-        document.cookie = "custom_cookie=custom_value; Expires=Fri, 14 Jan 2023 14:28:00 GMT, SameSite=None; Secure";
-    </script>
-    """
 def on_press_download_button():
     global clean_files
     global clean_filenames
@@ -130,10 +76,6 @@ def on_press_download_button():
     zf.close()
     output.seek(0)
     return output
-
-def create_cookie():
-    cookie: "http.cookies.BaseCookie[str]" = http.cookies.SimpleCookie()
-    cookie['key'] = 'VALASD'
 
 """ 
 add manual regex
@@ -146,7 +88,6 @@ def on_add_regex_button(event):
     
     # print("|||||||||||")
     #get_panel()
-    create_cookie()
     global list_regex_default
     # Add string to search_selector
     #list_regex_default.append(str(textbox_regex_name.value)+"<OOV>"+str(textbox_regex_from.value)+"<OOV>"+str(textbox_regex_to.value))
@@ -209,7 +150,7 @@ download_button = pn.widgets.FileDownload(filename="data.zip", callback=on_press
 #progress_gauge = Gauge(name='Progress', value=0, width=300, title_size=10, colors=[(0.2, 'red'), (0.8, 'gold'), (1, 'green')])
 progress_gauge = pn.indicators.LinearGauge(name='Progress of applying regex', value=0,bounds=(0,100),format='{value:.0f} %', horizontal=True,width=100)
 # Create a crossSelector to search the input in each of the files
-search_selector = CrossSelector(name='Regular Expression', options=list_regex_default, value=[], width=1000, definition_order=False)
+search_selector = CrossSelector(name='Regular Expression', options=list_regex_default, value=[], width=1000, definition_order=False,editable=True)
 
 
 #werkt alleen als je met values heen en weer gaat
@@ -299,6 +240,9 @@ separator_vertical = pn.pane.HTML("""
 
 <div class= "vertical"></div>
 """)    
+_scripts = {
+        'some_script': 'console.log(self.state.event)'
+}
 
 
 # Link the button to the callback function
@@ -355,7 +299,9 @@ dashboard = pn.Row(
 # Serve the dashboard
 dashboard.servable()       
 
-pn.extension('bokeh')
+pn.extension()
+
+
 #pn.extension(sizing_mode="stretch_width", template="fast")
 # panel serve hvplot_interactive.ipynb
 #panel serve --show --autoreload
