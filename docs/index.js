@@ -129,7 +129,7 @@ def upload_file(event):
 
     
     lines = upload_regex.value
-    lines = lines.decode()
+    lines = lines.decode("utf-8")
     #print(lines,' lines')
     regex_lines = lines.split('\\n')
     #print(regex_lines, ' regex_lines')
@@ -137,6 +137,8 @@ def upload_file(event):
     for i in regex_lines:
         if str(i) not in list_regex_default and len(str(i))>0:
             list_regex_default.append(str(i))
+            print(i)
+            print('AFTER STR')
             print(str(i))
             search_selector.value.append(str(i))
             search_selector.param.trigger('value')
